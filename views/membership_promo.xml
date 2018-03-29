@@ -1,0 +1,214 @@
+<openerp>
+	<data>
+
+<!-- VOUCHER =============================================================================================================== -->
+		<record id="membership_point_voucher_form" model="ir.ui.view">
+			<field name="name">membership.point.voucher.form</field>
+			<field name="model">membership.point.voucher</field>
+			<field name="arch" type="xml">
+				<form create="false" edit="false">
+					<header>
+						<button string="Use Voucher" type="object" name="action_use_voucher" class="oe_highlight" attrs="{'invisible': [('state','!=','generated')]}" confirm="Are you sure to use this voucher?" />
+						<field name="state" readonly="1" widget="statusbar" />
+					</header>
+					<group>
+						<field name="number" readonly="1"/>
+						<field name="description" />
+						<field name="member_id" />
+						<field name="setting_id" />
+						<field name="usage_date" />
+						<field name="usage_by" />
+						<field name="expired_date" />
+					</group>
+				</form>
+			</field>
+		</record>
+
+		<record model="ir.ui.view" id="membership_point_voucher_tree">
+			<field name="name">membership.point.voucher.tree</field>
+			<field name="model">membership.point.voucher</field>
+			<field name="arch" type="xml">
+				<tree string="Membership Point Voucher" create="false" edit="false">
+					<field name="number" />
+					<field name="member_id" />
+					<field name="state" />
+					<field name="usage_date" />
+					<field name="usage_by" />
+					<field name="expired_date" />
+				</tree>
+			</field>
+		</record>
+
+		<record id="membership_point_action_voucher" model="ir.actions.act_window">
+			<field name="name">Vouchers</field>
+			<field name="res_model">membership.point.voucher</field>
+			<field name="view_type">form</field>
+			<field name="view_mode">tree,form</field>
+		</record>
+
+		<menuitem sequence="1" id="membership_point_menu_voucher" parent="membership_point_menu_voucher_promo" action="membership_point_action_voucher" />
+
+<!-- GENERATE VOUCHER ====================================================================================================== -->
+		<record id="membership_point_voucher_generate_form" model="ir.ui.view">
+			<field name="name">membership.point.voucher.generate.form</field>
+			<field name="model">membership.point.voucher.generate</field>
+			<field name="arch" type="xml">
+				<form>
+					<header>
+						<button string="Confirm" type="object" name="action_confirm" class="oe_highlight" attrs="{'invisible': [('state','!=','draft')]}" confirm="Are you sure to generate vouchers?" />
+						<button string="Reject" type="object" name="action_reject" attrs="{'invisible': [('state','!=','draft')]}" confirm="Are you sure to reject generate vouchers?" />
+						<field name="state" readonly="1" widget="statusbar" />
+					</header>
+					<group>
+						<group>
+							<field name="setting_id" />	
+							<field name="number_of_vouchers" />
+						</group>
+						<group>
+							<field name="unit_cost" />
+							<field name="total_cost" options="{'no_create': 1}"/>
+						</group>
+					</group>
+				</form>
+			</field>
+		</record>
+
+		<record model="ir.ui.view" id="membership_point_voucher_generate_tree">
+			<field name="name">membership.point.voucher.generate.tree</field>
+			<field name="model">membership.point.voucher.generate</field>
+			<field name="arch" type="xml">
+				<tree string="Membership Point Generate Voucher">
+					<field name="setting_id" />
+					<field name="number_of_vouchers" />
+					<field name="unit_cost" />
+					<field name="total_cost" />
+					<field name="state" />
+				</tree>
+			</field>
+		</record>
+
+		<record id="membership_point_action_voucher_generate" model="ir.actions.act_window">
+			<field name="name">Generate Voucher</field>
+			<field name="res_model">membership.point.voucher.generate</field>
+			<field name="view_type">form</field>
+			<field name="view_mode">tree,form</field>
+		</record>
+
+		<menuitem sequence="2" id="membership_point_menu_voucher_generate" parent="membership_point_menu_voucher_promo" action="membership_point_action_voucher_generate" />
+
+<!-- VOUCHER SETTING ======================================================================================================= -->
+		<record id="membership_point_voucher_setting_form" model="ir.ui.view">
+			<field name="name">membership.point.voucher.setting.form</field>
+			<field name="model">membership.point.voucher.setting</field>
+			<field name="arch" type="xml">
+				<form>
+					<group>
+						<group>
+							<field name="name" />
+							<field name="voucher_type" />
+							<field name="is_purchaseable" attrs="{'invisible': [('voucher_type','=','gift')]}"/>
+							<field name="point_price" attrs="{'invisible': ['|',('voucher_type','=','gift'),('is_purchaseable','=',False)]}"/>
+							<field name="expire_calculation" />
+							<field name="expired_date" attrs="{'invisible': [('expire_calculation','!=','specific_date')]}"/>
+							<field name="expired_month" attrs="{'invisible': [('expire_calculation','!=','month')]}"/>
+						</group>
+						<group>
+							<field name="generated_count" readonly="1" />
+							<field name="active_count" readonly="1" />
+							<field name="used_count" readonly="1" />
+							<field name="expired_count" readonly="1" />
+						</group>
+					</group>
+					<notebook>
+						<page string="Member Levels">
+							<field name="member_level_ids" nolabel="1">
+								<tree editable="bottom">
+									<field name="name" />
+									<field name="sequence" />
+									<field name="notes" />
+								</tree>
+							</field>
+						</page>
+						<page string="Details">
+							<group>
+								<field name="description" />
+								<field name="terms_and_conditions" />
+							</group>
+							<group>
+								<group>
+									<field name="thumbnail" />
+								</group>
+								<group>
+									<field name="voucher_image" />
+								</group>
+							</group>
+						</page>
+					</notebook>
+				</form>
+			</field>
+		</record>
+
+		<record model="ir.ui.view" id="membership_point_voucher_setting_tree">
+			<field name="name">membership.point.voucher.setting.tree</field>
+			<field name="model">membership.point.voucher.setting</field>
+			<field name="arch" type="xml">
+				<tree string="Membership Point Voucher Setting">
+					<field name="name" />
+					<field name="voucher_type" />
+					<field name="generated_count" />
+					<field name="active_count" />
+					<field name="used_count" />
+					<field name="expired_count" />
+				</tree>
+			</field>
+		</record>
+
+		<record id="membership_point_action_voucher_setting" model="ir.actions.act_window">
+			<field name="name">Voucher Settings</field>
+			<field name="res_model">membership.point.voucher.setting</field>
+			<field name="view_type">form</field>
+			<field name="view_mode">tree,form</field>
+		</record>
+
+		<menuitem sequence="3" id="membership_point_menu_voucher_setting" parent="membership_point_menu_voucher_promo" action="membership_point_action_voucher_setting" />
+
+<!-- WELCOME PROMO SETTING ====================================================================================================== -->
+		<record model="ir.ui.view" id="membership_point_welcome_promo_form">
+			<field name="name">membership.point.welcome.promo.form</field>
+			<field name="model">membership.point.welcome.promo</field>
+			<field name="arch" type="xml">
+				<form string="Welcome Promo Setting" version="7.0">
+					<group>
+						<field name="name" string="Promo Description"/>
+						<field name="welcome_point" />
+						<field name="valid_from" />
+						<field name="valid_through" />
+					</group>
+				</form>
+			</field>
+		</record>
+
+		<record model="ir.ui.view" id="membership_point_welcome_promo_setting_tree">
+			<field name="name">membership.point.welcome.promo.tree</field>
+			<field name="model">membership.point.welcome.promo</field>
+			<field name="arch" type="xml">
+				<tree string="Welcome Promo Setting" version="7.0">
+					<field name="name" string="Promo Description" />
+					<field name="welcome_point" />
+					<field name="valid_from" />
+					<field name="valid_through" />
+				</tree>
+			</field>
+		</record>		
+
+		<record id="membership_point_welcome_promo_action" model="ir.actions.act_window">
+			<field name="name">Welcome Promo Setting</field>
+			<field name="res_model">membership.point.welcome.promo</field>
+			<field name="view_type">form</field>
+			<field name="view_mode">tree,form</field>
+		</record>
+
+		<menuitem sequence="4" id="membership_point_welcome_promo_menu_setting" parent="membership_point_menu_voucher_promo" action="membership_point_welcome_promo_action" />
+
+	</data>
+</openerp>
