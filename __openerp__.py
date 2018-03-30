@@ -18,6 +18,9 @@
 	],
 	'depends': ['base','web','mail','chjs_dated_setting','account'],
 	'data': [
+		'data/cron_autoexpire_voucher.xml',
+		'reports/membership_point.xml',
+		'reports/report_print_voucher.xml',
 		'views/membership_point.xml',
 		'views/membership_promo.xml',
 		'views/account_invoice.xml',

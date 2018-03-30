@@ -6,13 +6,13 @@
 			<field name="name">membership.point.voucher.form</field>
 			<field name="model">membership.point.voucher</field>
 			<field name="arch" type="xml">
-				<form create="false" edit="false">
+				<form create="false" edit="false" delete="false">
 					<header>
 						<button string="Use Voucher" type="object" name="action_use_voucher" class="oe_highlight" attrs="{'invisible': [('state','!=','generated')]}" confirm="Are you sure to use this voucher?" />
 						<field name="state" readonly="1" widget="statusbar" />
 					</header>
 					<group>
-						<field name="number" readonly="1"/>
+						<field name="name" readonly="1"/>
 						<field name="description" />
 						<field name="member_id" />
 						<field name="setting_id" />
@@ -28,14 +28,33 @@
 			<field name="name">membership.point.voucher.tree</field>
 			<field name="model">membership.point.voucher</field>
 			<field name="arch" type="xml">
-				<tree string="Membership Point Voucher" create="false" edit="false">
-					<field name="number" />
+				<tree string="Membership Point Voucher" create="false" edit="false" delete="false">
+					<field name="name" />
 					<field name="member_id" />
 					<field name="state" />
 					<field name="usage_date" />
 					<field name="usage_by" />
 					<field name="expired_date" />
 				</tree>
+			</field>
+		</record>
+
+		<record id="membership_point_voucher_search" model="ir.ui.view">
+			<field name="name">membership.point.voucher.search</field>
+			<field name="model">membership.point.voucher</field>
+			<field name="arch" type="xml">
+				<search>
+					<group expand="0" string="Group by">
+						<filter string="Voucher Setting"
+								domain="[]"
+								help="Group by Voucher Setting"
+								context="{'group_by': 'setting_id'}" />
+					</group>
+					<field name="name" string="Voucher Number" filter_domain="[('number','ilike',self)]" />
+					<field name="description" string="Voucher Description" filter_domain="[('description','ilike',self)]" />
+					<field name="member_id" string="Voucher Owner" filter_domain="[('member_id','ilike',self)]" />
+					<field name="state" string="Voucher State" domain="[('state','in',('generated','used','expired'))]" />
+				</search>
 			</field>
 		</record>
 
@@ -61,8 +80,9 @@
 					</header>
 					<group>
 						<group>
-							<field name="setting_id" />	
+							<field name="setting_id" />
 							<field name="number_of_vouchers" />
+							<field name="create_date" string="Generate Date" readonly="1" />
 						</group>
 						<group>
 							<field name="unit_cost" />
@@ -79,11 +99,23 @@
 			<field name="arch" type="xml">
 				<tree string="Membership Point Generate Voucher">
 					<field name="setting_id" />
-					<field name="number_of_vouchers" />
+					<field name="number_of_vouchers" sum="Vouchers Generated" />
 					<field name="unit_cost" />
-					<field name="total_cost" />
+					<field name="total_cost" sum="Total Cost for Generating Vouchers" />
 					<field name="state" />
+					<field name="create_date" string="Generate Date" />
 				</tree>
+			</field>
+		</record>
+
+		<record id="membership_point_voucher_generate_search" model="ir.ui.view">
+			<field name="name">membership.point.voucher.generate.search</field>
+			<field name="model">membership.point.voucher.generate</field>
+			<field name="arch" type="xml">
+				<search>
+					<field name="setting_id" string="Voucher Setting" filter_domain="[('setting_id','ilike',self)]" />
+					<field name="state" string="Voucher State" domain="[('state','in',('draft','confirmed','rejected'))]" />
+				</search>
 			</field>
 		</record>
 
@@ -120,7 +152,7 @@
 						</group>
 					</group>
 					<notebook>
-						<page string="Member Levels">
+						<page string="Member Levels" attrs="{'invisible': [('voucher_type','=','gift')]}">
 							<field name="member_level_ids" nolabel="1">
 								<tree editable="bottom">
 									<field name="name" />
@@ -199,7 +231,7 @@
 					<field name="valid_through" />
 				</tree>
 			</field>
-		</record>		
+		</record>
 
 		<record id="membership_point_welcome_promo_action" model="ir.actions.act_window">
 			<field name="name">Welcome Promo Setting</field>

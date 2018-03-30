@@ -1,0 +1,34 @@
+<openerp>
+	<data>
+
+		<record id="paperformat_for_voucher" model="report.paperformat">
+			<field name="name">Paper format for voucher</field>
+			<field name="default" eval="True" />
+			<field name="format">A6</field>
+			<field name="page_height">0</field>
+			<field name="page_width">0</field>
+			<field name="orientation">Landscape</field>
+			<field name="margin_top">10</field>
+			<field name="margin_bottom">10</field>
+			<field name="margin_left">10</field>
+			<field name="margin_right">10</field>
+			<field name="header_line" eval="False" />
+			<field name="header_spacing">0</field>
+			<field name="dpi">90</field>
+		</record>
+
+		<report
+			id="membership_point_print_voucher_report"
+			model="membership.point.voucher"
+			string="Print Voucher"
+			report_type="qweb-pdf"
+			name="membership_point.report_print_voucher_template"
+			file="membership_point.report_print_voucher_template"
+		/>
+
+		<record id="membership_point_print_voucher_report" model="ir.actions.report.xml">
+			<field name="paperformat_id" ref="membership_point.paperformat_for_voucher"></field>
+		</record>
+
+	</data>
+</openerp>

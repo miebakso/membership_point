@@ -1,0 +1,55 @@
+<openerp>
+	<data>
+
+		<template id="report_print_voucher_template">
+			<t t-call="report.html_container">
+				<t t-foreach="docs" t-as="o">
+					<t t-call="membership_point.report_print_voucher_document_template" />
+				</t>
+			</t>
+		</template>
+
+		<template id="report_print_voucher_document_template">
+			<div class="page">
+				<table>
+					<tr>
+						<th>Nomor Voucher</th>
+						<td>:</td>
+						<td><span t-field="o.name" /></td>
+					</tr>
+					<tr>
+						<th>Nama Voucher</th>
+						<td>:</td>
+						<td><span t-field="o.description" /></td>
+					</tr>
+					<tr>
+						<th>Deskripsi Voucher</th>
+						<td>:</td>
+						<td><span t-field="o.setting_id.description" /></td>
+					</tr>
+					<tr>
+						<th>Syarat dan Ketentuan</th>
+						<td>:</td>
+						<td><span t-field="o.setting_id.terms_and_conditions" /></td>
+					</tr>
+					<tr>
+						<th>Kode Member Pemilik Voucher</th>
+						<td>:</td>
+						<td><span t-field="o.member_id.member_id" /></td>
+					</tr>
+					<tr>
+						<th>Nama Member Pemilik Voucher</th>
+						<td>:</td>
+						<td><span t-field="o.member_id.name" /> <span t-field="o.member_id.last_name" /></td>
+					</tr>
+					<tr>
+						<th>Berlaku sampai</th>
+						<td>:</td>
+						<td><span t-field="o.expired_date" /></td>
+					</tr>
+				</table>
+			</div>
+		</template>
+
+	</data>
+</openerp>

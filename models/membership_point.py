@@ -288,7 +288,7 @@ class membership_point_member(osv.osv):
 					'member_id': member.id,																			# PROSI
 					'point_in': get_promo.welcome_point																# PROSI
 				}																									# PROSI
-				log_id =point_log.create(cr,uid,values)																# PROSI
+				log_id = point_log.create(cr,uid,values)																# PROSI
 				point_log.action_approve(cr,uid,log_id)																# PROSI
 
 		return True

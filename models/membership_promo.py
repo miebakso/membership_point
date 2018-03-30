@@ -2,6 +2,7 @@ import datetime
 from dateutil.relativedelta import relativedelta
 from openerp import models, fields, api
 from openerp.exceptions import ValidationError
+from openerp.tools import DEFAULT_SERVER_DATETIME_FORMAT, DEFAULT_SERVER_DATE_FORMAT
 
 # ==========================================================================================================================
 
@@ -36,10 +37,10 @@ class membership_point_voucher_setting(models.Model):
 	], 'Voucher Expire Calculation Method', default='month')
 	expired_date = fields.Date('Voucher Expire Date')
 	expired_month = fields.Integer('Voucher Expire Month')
-	generated_count = fields.Integer('Number of Vouchers Generated', compute="_compute_count")
-	active_count = fields.Integer('Number of Vouchers Active', compute="_compute_count")
-	used_count = fields.Integer('Number of Vouchers Used', compute="_compute_count")
-	expired_count = fields.Integer('Number of Vouchers Expired', compute="_compute_count")
+	generated_count = fields.Integer('Number of Vouchers Generated', compute="_compute_count", store=False)
+	active_count = fields.Integer('Number of Vouchers Active', compute="_compute_count", store=False)
+	used_count = fields.Integer('Number of Vouchers Used', compute="_compute_count", store=False)
+	expired_count = fields.Integer('Number of Vouchers Expired', compute="_compute_count", store=False)
 
 	@api.one
 	def purchase_member_voucher(self, member, qty):
@@ -77,8 +78,8 @@ class membership_point_voucher(models.Model):
 	_name = 'membership.point.voucher'
 	_description = 'Membership point voucher'
 
-	number = fields.Char('Voucher Number', size=100, required=True)
-	description = fields.Char('Voucher Name', size=255, compute="_compute_description")
+	name = fields.Char('Voucher Number', size=100, required=True)
+	description = fields.Char('Voucher Name', size=255, compute="_compute_description", store=False)
 	member_id = fields.Many2one('membership.point.member', 'Voucher Owner')
 	setting_id = fields.Many2one('membership.point.voucher.setting', 'Voucher Setting')
 	state = fields.Selection([
@@ -108,8 +109,8 @@ class membership_point_voucher(models.Model):
 			raise ValidationError('Voucher number isn\'t generated, probably because generate_number() function is not yet implemented.')
 
 		voucher_setting = self.env['membership.point.voucher.setting'].browse(vals['setting_id'])[0]
-		member = self.env['membership.point.member'].browse(vals['member_id'])[0]
 		if voucher_setting.voucher_type == 'member':
+			member = self.env['membership.point.member'].browse(vals['member_id'])[0]
 			flg1 = False
 			if len(voucher_setting.member_level_ids) == 0:
 				flg1 = True
@@ -125,7 +126,7 @@ class membership_point_voucher(models.Model):
 			if not flg1:
 				raise ValidationError('Member doesn\'t have the level required.')
 
-		vals['number'] = generated_number
+		vals['name'] = generated_number
 		vals['expired_date'] = {
 			'specific_date': voucher_setting.expired_date,
 			'month': datetime.date.today() + relativedelta(months = +voucher_setting.expired_month),
@@ -137,7 +138,16 @@ class membership_point_voucher(models.Model):
 	def _compute_description(self):
 		voucher_setting_env = self.env['membership.point.voucher.setting']
 		for record in self:
-			record.description = voucher_setting_env.browse(record.setting_id.id).description
+			record.description = voucher_setting_env.browse(record.setting_id.id).name
+
+	@api.model
+	def cron_autoexpire_voucher(self):
+		vouchers = self.search([('state','!=','expired')])
+		for voucher in vouchers:
+			if datetime.datetime.strptime(voucher.expired_date, DEFAULT_SERVER_DATE_FORMAT).date() >= datetime.date.today():
+				voucher.write({
+					'state': 'expired',
+				})
 
 # ==========================================================================================================================
 
@@ -145,10 +155,10 @@ class membership_point_voucher_generate(models.Model):
 	_name = 'membership.point.voucher.generate'
 	_description = 'History/log generate gift voucher'
 
-	setting_id = fields.Many2one('membership.point.voucher.setting', 'Voucher Setting')
+	setting_id = fields.Many2one('membership.point.voucher.setting', 'Voucher Setting', domain="[('voucher_type','=','gift')]")
 	number_of_vouchers = fields.Integer('Number of Voucher Generated', required=True, default=1)
 	unit_cost = fields.Float('Unit Cost')
-	total_cost = fields.Float('Total Cost', compute="_compute_cost")
+	total_cost = fields.Float('Total Cost', compute="_compute_cost", store=False)
 	state = fields.Selection([
 		('draft', 'Draft'),
 		('confirmed', 'Confirmed'),
